@@ -1,0 +1,6 @@
+mkdocs>=1.6
+mkdocs-material>=9.5
+lunr[languages]>=0.7
+pandas
+matplotlib
+seaborn

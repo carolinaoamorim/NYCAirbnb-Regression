@@ -1,0 +1,89 @@
+site_name: Regressão Airbnb NYC
+site_description: Análise e modelagem de preços de anúncios do Airbnb em Nova York.
+site_author: Carolina Amorim e Lara Abduni
+repo_name: NYCAirbnb-Regression
+repo_url: https://github.com/carolinaoamorim/NYCAirbnb-Regression
+site_url: https://carolinaoamorim.github.io/NYCAirbnb-Regression/
+copyright: Projeto acadêmico de Machine Learning — Carolina Amorim e Lara Abduni
+
+docs_dir: docs
+
+nav:
+  - Início: index.md
+  - Dataset: dataset.md
+  - Análise e Modelagem: analysis.md
+  - Setup e Execução: setup.md
+  - Arquitetura do Projeto: project-structure.md
+  - Referências: references.md
+
+theme:
+  name: material
+  language: pt-BR
+  icon:
+    logo: material/home-city
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.path
+    - navigation.top
+    - navigation.footer
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: deep orange
+      toggle:
+        icon: material/weather-night
+        name: Mudar para modo escuro
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: deep orange
+      toggle:
+        icon: material/weather-sunny
+        name: Mudar para modo claro
+
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/carolinaoamorim/NYCAirbnb-Regression
+      name: Repositório no GitHub
+
+extra_css:
+  - assets/stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      title: Nesta página
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+plugins:
+  - search:
+      lang: pt

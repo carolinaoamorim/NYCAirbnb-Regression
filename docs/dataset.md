@@ -43,53 +43,34 @@ O projeto utiliza o [**New York City Airbnb Open Data**](https://www.kaggle.com/
 | `calculated_host_listings_count` | Quantidade de anúncios associados ao anfitrião |
 | `availability_365` | Dias de disponibilidade informados para os próximos 365 dias |
 
-## Estatísticas das Variáveis Numéricas
+## Estatísticas do Alvo Apresentadas no Notebook
 
-Resumo calculado sobre o CSV original. `reviews_per_month` tem 10.052 observações ausentes; por isso, suas estatísticas consideram apenas os 38.843 valores disponíveis. Os identificadores `id` e `host_id` aparecem para completar a inspeção do esquema, mas não são usados como preditores.
+A célula de inspeção executa `df["price"].describe(percentiles=[.5, .9, .99]).round(1)`. O resumo abaixo reproduz essa saída sobre o arquivo original, antes da exclusão de preços zero. Não inclui categorias nem estatísticas de identificadores.
 
-| Variável | Média | Mediana | Desvio padrão |
-|---|---:|---:|---:|
-| `id` | 19.017.143,24 | 19.677.284 | 10.983.108,39 |
-| `host_id` | 67.620.010,65 | 30.793.816 | 78.610.967,03 |
-| `latitude` | 40,7289 | 40,7231 | 0,0545 |
-| `longitude` | -73,9522 | -73,9557 | 0,0462 |
-| `price` (US$) | 152,72 | 106 | 240,15 |
-| `minimum_nights` | 7,03 | 3 | 20,51 |
-| `number_of_reviews` | 23,27 | 5 | 44,55 |
-| `reviews_per_month` | 1,37 | 0,72 | 1,68 |
-| `calculated_host_listings_count` | 7,14 | 1 | 32,95 |
-| `availability_365` | 112,78 | 45 | 131,62 |
+| Estatística de `price` | Valor |
+|---|---:|
+| Contagem | 48.895 |
+| Média, US$ | 152,7 |
+| Desvio padrão, US$ | 240,2 |
+| Mínimo, US$ | 0,0 |
+| Mediana, US$ | 106,0 |
+| Percentil 90, US$ | 269,0 |
+| Percentil 99, US$ | 799,0 |
+| Máximo, US$ | 10.000,0 |
 
-Médias bem acima das medianas e desvios padrão elevados em preço, noites mínimas, avaliações e disponibilidade indicam distribuições assimétricas e/ou dispersas. A média dos identificadores não tem interpretação estatística útil. As features numéricas mais assimétricas e os preços extremos justificam complementar médias com medianas, visualizações robustas e modelos avaliados no mesmo recorte de preço.
+A média superior à mediana e o máximo distante do P99 evidenciam a cauda à direita. O corte usado na modelagem é recalculado apenas no treino, e não copiado desse resumo do arquivo completo. A [análise](analysis.md) explicita o vínculo entre cada evidência e a decisão de pré-processamento.
 
 ## Valores Ausentes e Pontos de Atenção
 
 | Ponto observado | Tratamento no notebook | Observação |
 |---|---|---|
 | `reviews_per_month` ausente em anúncios sem avaliações | Substituído por zero | O notebook verifica que os valores ausentes nessa coluna correspondem a `number_of_reviews = 0`. |
-| Coordenadas, mínimo de noites, avaliações e disponibilidade | Imputação pela mediana no pipeline | O imputador é ajustado dentro do pipeline para não antecipar informações do teste. |
+| Coordenadas, mínimo de noites, avaliações e disponibilidade | Imputação preventiva pela mediana no pipeline | Não há nulos nessas colunas na inspeção apresentada. O imputador é ajustado em cada treino, sem antecipar informações do teste. |
 | `name`, `host_name`, `last_review` | Colunas removidas | Não entram no modelo final. |
 | `id` e `host_id` | Colunas removidas dos preditores | São identificadores, não características generalizáveis do anúncio. |
 | `price = 0` | Registros removidos | Preço zero não é útil para o alvo de regressão. |
-| Preços extremos | Corte no percentil 99 do treino | O limite de US$ 799 é calculado no treino e aplicado também ao teste. |
+| Preços extremos | Corte no percentil 99 do treino | O limite de US$ 798,76 (impresso como US$ 799) é calculado no treino e aplicado também ao teste. Isso restringe o escopo das métricas. |
 | Bairros pouco frequentes | Agrupados no encoder | Bairros com menos de 50 anúncios no treino são tratados como infrequentes. |
-
-## Distribuição dos Anúncios
-
-O arquivo contém anúncios nos cinco distritos abaixo. Manhattan e Brooklyn concentram a maior parte dos registros.
-
-| Distrito | Anúncios |
-|---|---:|
-| Manhattan | 21.661 |
-| Brooklyn | 20.104 |
-| Queens | 5.666 |
-| Bronx | 1.091 |
-| Staten Island | 373 |
-
-Os tipos de quarto mais frequentes são **Entire home/apt** (25.409 anúncios), **Private room** (22.326) e **Shared room** (1.160).
-
-!!! warning "Defasagem temporal"
-    Os registros representam um retrato de 2019. Mudanças posteriores no mercado de hospedagem e nas regras locais de Nova York limitam a validade de previsões atuais sem dados recentes e nova avaliação.
 
 ## Leitura Inicial
 

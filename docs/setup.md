@@ -60,15 +60,17 @@ mkdocs serve
 
 Abra o endereço indicado no terminal, normalmente `http://127.0.0.1:8000/`.
 
-## Regenerando os Gráficos Descritivos
+## Exportando as Figuras do Notebook
 
-Os gráficos calculados diretamente do CSV podem ser atualizados sem executar nem modificar o notebook:
+Após executar e salvar o notebook, exporte os PNGs das suas saídas para a documentação:
 
 ```powershell
 python scripts/generate_docs_figures.py
 ```
 
-Os gráficos de validação, resíduos e SHAP foram exportados dos resultados já salvos no notebook. Para atualizá-los, execute novamente as células correspondentes no notebook e exporte os novos resultados.
+O script usa apenas a biblioteca padrão do Python e copia as **12 figuras salvas** no notebook, sem ler o CSV, treinar modelos ou desenhar gráficos adicionais. Os nomes estão em `metadata.docs_figures` das células que produzem imagens. Se uma figura estiver ausente ou houver erro nas saídas, a exportação falha em vez de publicar resultados incompletos.
+
+O workflow do GitHub Pages executa a mesma exportação antes do build. Para atualizar resultados, execute **Restart & Run All**, salve o notebook, exporte as figuras e revise as análises e métricas do relatório antes de enviar os arquivos.
 
 ## Build de Verificação
 

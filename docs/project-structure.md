@@ -33,9 +33,9 @@ NYCAirbnb-Regression/
 - `nycairbnb.ipynb`: notebook de análise, treinamento, avaliação e interpretação dos modelos.
 - `AB_NYC_2019.csv`: dataset original de anúncios de Airbnb em NYC.
 - `docs/`: documentação do projeto em Markdown.
-- `docs/assets/images/`: gráficos descritivos gerados a partir do CSV e gráficos exportados do notebook.
+- `docs/assets/images/`: somente as 12 figuras exportadas das saídas salvas do notebook, sem redesenho.
 - `docs/assets/stylesheets/extra.css`: ajustes visuais do tema MkDocs Material.
-- `scripts/generate_docs_figures.py`: gera figuras da análise descritiva sem modificar o notebook.
+- `scripts/generate_docs_figures.py`: exporta os PNGs salvos nas células do notebook, identificados por `metadata.docs_figures`; não gera gráficos novos.
 - `.github/workflows/deploy-docs.yml`: valida e publica o site no GitHub Pages a cada atualização relevante no branch `main`.
 - `mkdocs.yml`: configuração, tema, extensões e navegação do site.
 - `requirements.txt`: dependências para executar o notebook.
@@ -47,22 +47,18 @@ NYCAirbnb-Regression/
 |---|---|
 | `index.md` | Apresentação do problema, métricas e principais achados. |
 | `dataset.md` | Fonte, dicionário de dados, ausências e decisões de preparação. |
-| `analysis.md` | Pipeline, comparação de modelos, resultados e limitações. |
+| `analysis.md` | Preparação e as quatro seções da APS2: modelos, teste, explicabilidade e discussão crítica. |
 | `setup.md` | Instalação, execução do notebook e comandos MkDocs. |
 | `project-structure.md` | Estrutura do projeto e função de cada arquivo. |
 | `references.md` | Dataset, bibliotecas e conceitos usados. |
 
 ## Fluxo de Trabalho
 
-```mermaid
-flowchart TD
-    A[Dataset CSV] --> B[Notebook de análise]
-    B --> C[Pré-processamento e validação]
-    C --> D[Resultados e interpretação]
-    D --> E[Documentação MkDocs]
-    E --> F[Build local]
-    F --> G[Publicação opcional]
-```
+1. Executar e salvar o notebook com o CSV local.
+2. Exportar as figuras com `python scripts/generate_docs_figures.py`.
+3. Conferir as análises e métricas do relatório com as saídas salvas.
+4. Validar a documentação com `mkdocs build --strict`.
+5. Enviar as alterações ao repositório quando a entrega estiver revisada.
 
 ## Organização do Pipeline
 

@@ -52,17 +52,14 @@ Desempenho no conjunto de teste mantido fora dos ajustes.
 | Como foi o resultado no teste? | RMSE de US$ 72,77, MAE de US$ 44,35 e R² de 0,50. |
 | O que exige cuidado? | Valores extremos, diferença entre preço anunciado e preço efetivamente pago, defasagem do dataset e validação aleatória com dados geográficos. |
 
-## Pipeline da Análise
+## Organização conforme o roteiro da APS2
 
-```mermaid
-flowchart LR
-    A[CSV de anúncios] --> B[Inspeção e qualidade]
-    B --> C[Separação treino e teste]
-    C --> D[Pipeline de pré-processamento]
-    D --> E[Validação cruzada e ajuste]
-    E --> F[Avaliação final no teste]
-    F --> G[Interpretação e limitações]
-```
+1. **Seleção e implementação:** Dummy, Ridge e ensemble, buscas de hiperparâmetros, mudança no alvo e curvas de aprendizado.
+2. **Avaliação no teste:** métricas e os três diagnósticos exigidos para regressão.
+3. **Interpretação e explicabilidade:** três coeficientes do Ridge, três importâncias do ensemble, SHAP global e três casos individuais.
+4. **Discussão crítica:** duas limitações do modelo, duas dos dados e duas ações de operacionalização e manutenção, com referências.
+
+O [relatório](analysis.md) utiliza exclusivamente as figuras salvas em `nycairbnb.ipynb`, com análise para cada uma e vínculo entre evidências e decisões de preparação.
 
 ## Principais Achados
 
@@ -93,7 +90,7 @@ Os anúncios são de 2019, e o preço registrado é o valor anunciado, não nece
 </div>
 
 !!! note "Escopo da métrica"
-    O notebook calcula o percentil 99 do preço somente no treino (US$ 799) e remove valores acima desse limite tanto do treino quanto do teste. As métricas desta documentação correspondem a essa avaliação filtrada, não a todos os anúncios originais.
+    O notebook calcula o percentil 99 do preço somente no treino (US$ 798,76, impresso como US$ 799) e remove valores acima desse limite tanto do treino quanto do teste. As métricas desta documentação correspondem a essa avaliação filtrada, não a todos os anúncios originais.
 
 ## Autoria
 

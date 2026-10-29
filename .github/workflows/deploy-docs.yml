@@ -7,7 +7,7 @@ on:
     paths:
       - "docs/**"
       - "mkdocs.yml"
-      - "AB_NYC_2019.csv"
+      - "nycairbnb.ipynb"
       - "requirements-docs.txt"
       - "scripts/generate_docs_figures.py"
       - ".github/workflows/deploy-docs.yml"
@@ -40,7 +40,7 @@ jobs:
       - name: Install documentation dependencies
         run: python -m pip install -r requirements-docs.txt
 
-      - name: Generate data figures
+      - name: Export saved notebook figures
         run: python scripts/generate_docs_figures.py
 
       - name: Build documentation

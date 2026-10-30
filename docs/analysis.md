@@ -5,21 +5,21 @@ estrutura do notebook `nycairbnb.ipynb` e do roteiro da APS2. As 14 figuras são
 exportados sem redesenho, com a mesma numeração. Cada figura é seguida da sua análise, e cada decisão cita a figura que a
 motivou.
 
-| Seção | Item do roteiro |
+| Etapa | Item do roteiro |
 |---|---|
-| [0](#0-dados-e-pipeline-de-pre-processamento) | Dados e pipeline de pré-processamento |
-| [1.1 – 1.4](#1-selecao-e-implementacao-dos-modelos) | 3 modelos e métrica · hiperparâmetros · mudança no pipeline e impacto · curvas de aprendizado |
-| [2](#2-avaliacao-do-melhor-modelo-no-conjunto-de-teste) | Avaliação do melhor modelo no teste |
-| [3.1 – 3.4](#3-interpretacao-e-explicabilidade) | Coeficientes do linear · importância no ensemble · SHAP global · SHAP em 3 predições |
-| [4.1 – 4.3](#4-discussao-critica) | Limitações do modelo · limitações dos dados · operacionalização e manutenção |
+| [Dados e pipeline](#dados-e-pipeline-de-pre-processamento) | Dados e pipeline de pré-processamento, com a [comparação com o pipeline da APS1](#relacao-com-o-pipeline-da-aps1) |
+| [Seleção e implementação dos modelos](#selecao-e-implementacao-dos-modelos) | 3 modelos e métrica · hiperparâmetros · mudança no pipeline e impacto · curvas de aprendizado |
+| [Avaliação no teste](#avaliacao-do-melhor-modelo-no-conjunto-de-teste) | Avaliação do melhor modelo no teste |
+| [Interpretação e explicabilidade](#interpretacao-e-explicabilidade) | Coeficientes do linear · importância no ensemble · SHAP global · SHAP em 3 predições |
+| [Discussão crítica](#discussao-critica) | Limitações do modelo · limitações dos dados · operacionalização e manutenção |
 
-## 0. Dados e pipeline de pré-processamento
+## Dados e pipeline de pré-processamento
 
 Ordem adotada: carregar → aplicar apenas regras **estruturais** → **separar treino e teste** → só então inspecionar,
 gerar figuras e decidir o pré-processamento, **usando apenas o treino**. Nenhuma estatística do teste influencia as
 decisões.
 
-### 0.1 Regras estruturais e separação treino/teste
+### Regras estruturais e separação treino/teste
 
 - **`price <= 0`** (11 anúncios): diária zero não é um preço válido; é uma regra de validade, não um corte baseado em
   distribuição.
@@ -27,7 +27,7 @@ decisões.
   `last_review` (data; volume e frequência de avaliações permanecem em `number_of_reviews` e `reviews_per_month`).
 - **Split 80/20** com `random_state=42`, antes de qualquer inspeção: 39.107 anúncios no treino e 9.777 no teste.
 
-### 0.2 Inspeção do treino e evidências para o pré-processamento
+### Inspeção do treino e evidências para o pré-processamento
 
 O `describe()` é aplicado **somente ao alvo** (numérico) e **somente no treino**: mediana de US$ 106, percentil 90 de
 US$ 269, percentil 99 de US$ 798,76, máximo de US$ 10.000 e assimetria de 19,7. As variáveis categóricas são inspecionadas
@@ -44,7 +44,7 @@ p99 formam uma cauda rarefeita que se estende por mais de uma ordem de grandeza,
 dominariam o ajuste e a métrica.
 → **Decisão:** limitar o alvo ao **p99 do treino (US$ 798,76)** e aplicar o mesmo limite ao teste (392 anúncios removidos
 do treino e 100 do teste; restam 38.715 e 9.677). O escopo do modelo passa a ser anúncios de até ~US$ 800/noite, e as
-métricas valem para esse recorte. A mesma figura também motiva a mudança testada na [seção 1.3](#13-mudanca-no-pipeline-transformacao-logaritmica-do-alvo).
+métricas valem para esse recorte. A mesma figura também motiva a [transformação logarítmica do alvo](#mudanca-no-pipeline-transformacao-logaritmica-do-alvo).
 
 <figure markdown>
   ![Barras de frequência de room_type e neighbourhood_group e ranking de frequência dos bairros com o limiar de 50 anúncios.](assets/images/categorical_frequency.png)
@@ -66,7 +66,7 @@ métricas valem para esse recorte. A mesma figura também motiva a mudança test
 `number_of_reviews == 0` → **Decisão:** imputar **0**, e não a média. As demais numéricas não têm ausentes; o imputador
 pela mediana é preventivo para dados novos.
 
-### 0.3 Pipeline
+### Pipeline
 
 | Evidência | Decisão no pipeline |
 |---|---|
@@ -76,15 +76,79 @@ pela mediana é preventivo para dados novos.
 | Figura 2: 129 bairros com < 50 anúncios | `min_frequency=50` |
 | Figura 1: cauda extrema do preço | Corte no p99 do treino |
 
-Não usamos **PCA**: há apenas 7 numéricas, e a seção 3 exige interpretar coeficientes e importâncias por feature original.
+Não usamos **PCA**: há apenas 7 numéricas, e a [interpretação](#interpretacao-e-explicabilidade) exige analisar coeficientes e importâncias por feature original (a [comparação com a APS1](#relacao-com-o-pipeline-da-aps1) mostra o efeito do PCA e do `IQRClipper` da APS1 nestes dados).
 Tudo fica em `Pipeline` + `ColumnTransformer`, reajustado em cada fold (sem vazamento), o que resulta em **104 features**.
 O HistGradientBoosting usa `early_stopping=False`: por padrão, a parada antecipada liga sozinha acima de 10 mil linhas, o
 que faria o `max_iter` tunado ser ignorado e mudaria o regime de ajuste no meio da curva de aprendizado
 ([documentação](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.HistGradientBoostingRegressor.html)).
 
-## 1. Seleção e implementação dos modelos
+### Relação com o pipeline da APS1
 
-### 1.1 Três modelos e a métrica de desempenho
+O roteiro pede que a modelagem use o pipeline construído na APS1. O pipeline final da APS1 (`StrokePrediction.ipynb`) era:
+
+- **numéricas:** `SimpleImputer(median)` → `IQRClipper(factor=1.5)` → `StandardScaler` → `PCA(n_components=0.95)`;
+- **categóricas:** `SimpleImputer(most_frequent)` → `OneHotEncoder(handle_unknown="ignore")`;
+- tudo num `ColumnTransformer`, ajustado só no treino, depois do split.
+
+O notebook reproduz esse pipeline **idêntico** (mesma classe `IQRClipper`, mesmas etapas e parâmetros; só as listas de
+colunas mudam) e o compara com o pipeline adotado acima, com a mesma validação (KFold 5, mesma semente) e a mesma métrica da seleção de modelos.
+
+| RMSE médio na CV, US$ | Pipeline da APS1 | Pipeline da APS2 | Diferença |
+|---|---:|---:|---:|
+| Ridge (padrão) | 79,03 | 79,66 | +0,63 |
+| HistGB (padrão) | 74,97 | **72,82** | −2,15 |
+
+| `IQRClipper` da APS1 no treino | Limite superior | % do treino cortado |
+|---|---:|---:|
+| `calculated_host_listings_count` | 3,5 | 14,56 |
+| `minimum_nights` | 11 | 13,57 |
+| `number_of_reviews` | 58,5 | 12,40 |
+| `reviews_per_month` | 3,6 | 8,24 |
+| `longitude` | −73,87 | 5,77 |
+| `latitude` | 40,87 | 0,80 |
+| `availability_365` | 562,5 | 0,00 |
+
+| Grupos que o corte transforma no mesmo valor | Anúncios | Preço mediano, US$ |
+|---|---:|---:|
+| `minimum_nights` 11–29 (vira 11) | 1.722 | 99 |
+| `minimum_nights` 30+ (vira 11) | 3.559 | 129 |
+| `calculated_host_listings_count` 4–9 (vira 3,5) | 3.138 | 75 |
+| `calculated_host_listings_count` 10+ (vira 3,5) | 2.499 | 165 |
+
+**Análise da comparação com a APS1.**
+
+- **Desempenho:** com o pipeline da APS1 idêntico, o HistGB fica **pior** (US$ 74,97 contra US$ 72,82, diferença de
+  US$ 2,15). O Ridge fica um pouco melhor com o pipeline da APS1 (US$ 79,03 contra US$ 79,66), mas o melhor modelo do
+  trabalho é o ensemble, e para ele o pipeline da APS2 é claramente superior.
+- **`IQRClipper`:** neste dataset, valores "extremos" pelo critério do IQR não são erros, são informação. O corte junta
+  grupos com preços bem diferentes: anfitriões com 4–9 anúncios (US$ 75) e com 10+ (US$ 165), e estadias de 11–29
+  noites (US$ 99) e de 30+ (US$ 129). As árvores não precisam desse corte e perdem a distinção. O Ridge se beneficia um
+  pouco dele, porque valores extremos pesam num modelo linear.
+- **PCA:** com só 7 numéricas, reduz apenas para 6 componentes (95,1% da variância), sem ganho real de dimensionalidade.
+  Além disso, mistura variáveis sem relação direta: latitude (0,74) e longitude (0,65) caem juntas na PC3, e
+  `minimum_nights`, `calculated_host_listings_count` e `availability_365` (0,54 a 0,60) na PC2. Isso impediria a
+  interpretação por feature exigida mais adiante.
+- **Imputação de `reviews_per_month`:** a mediana da APS1 (0,72) seria atribuída a 7.833 anúncios que não têm nenhuma
+  avaliação. O valor correto é 0.
+
+**O que foi mantido e o que foi adaptado da APS1:**
+
+| Etapa do pipeline da APS1 | Na APS2 | Motivo |
+|---|---|---|
+| `ColumnTransformer` com ramo numérico e categórico, ajustado só no treino | **Mantido** | Mesma estrutura e mesma proteção contra vazamento |
+| `SimpleImputer(median)` nas numéricas | **Mantido**, exceto em `reviews_per_month` (→ 0) | Ausência ⇔ zero reviews (inspeção do treino) |
+| `IQRClipper(1.5)` | **Removido** | Destrói informação de preço e piora o ensemble |
+| `StandardScaler` | **Mantido** | Necessário para a penalização L2 do Ridge |
+| `PCA(0.95)` | **Removido** | Sem ganho de dimensão e impede a interpretação por feature |
+| `SimpleImputer(most_frequent)` nas categóricas | **Removido** | Não há ausentes nas categóricas do Airbnb; a etapa não teria efeito |
+| `OneHotEncoder(handle_unknown="ignore")` | **Mantido**, com `min_frequency=50` | Bairros raros (Figura 2) ganhariam coeficientes instáveis |
+
+O pipeline da APS2 é, portanto, o pipeline da APS1 com essas adaptações, cada uma justificada por evidência deste
+dataset. Ele é usado em toda a modelagem a seguir.
+
+## Seleção e implementação dos modelos
+
+### Três modelos e a métrica de desempenho
 
 - **Dummy** (`DummyRegressor`, média do treino): linha de base.
 - **Linear com regularização** (`Ridge`, L2): simples e interpretável. A regularização controla os coeficientes de
@@ -103,7 +167,7 @@ decisões usam o RMSE**. **Validação:** `KFold(n_splits=5, shuffle=True, rando
 O Ridge já reduz o erro em ~23% frente ao Dummy, o que mostra sinal linear relevante. O ganho extra do ensemble indica
 não-linearidades e interações que o modelo linear não representa.
 
-### 1.2 Seleção de hiperparâmetros
+### Seleção de hiperparâmetros
 
 - **Ridge → `GridSearchCV`**: um único hiperparâmetro (`alpha`), com grade log de 10⁻⁴ a 10⁴ (17 valores).
 - **HistGB → `RandomizedSearchCV`** (15 candidatos): cinco hiperparâmetros que interagem; a busca aleatória explora o
@@ -131,7 +195,7 @@ O ajuste reduz o RMSE do HistGB de US$ 72,82 para **US$ 72,47**, um ganho pequen
 **Conclusão parcial:** o HistGB tunado é o melhor modelo até aqui (−29,7% de RMSE frente ao Dummy). Como o tuning rendeu
 pouco nos dois modelos, o limite parece estar mais nas features do que nos hiperparâmetros.
 
-### 1.3 Mudança no pipeline: transformação logarítmica do alvo
+### Mudança no pipeline: transformação logarítmica do alvo
 
 **Proposta.** A Figura 1 mostrou forte assimetria do preço, e os efeitos tendem a ser multiplicativos. Modelar
 `log(1 + price)` deixa o alvo mais simétrico e reduz o peso dos anúncios caros. **Implementação:**
@@ -168,7 +232,7 @@ da Figura 3.
 **Decisão:** pela métrica escolhida (RMSE), a mudança é **rejeitada** e o melhor modelo segue sendo o **HistGB tunado com
 alvo original**. Se o objetivo fosse MAE ou erro percentual, o log seria a escolha.
 
-### 1.4 Curvas de aprendizado do melhor modelo
+### Curvas de aprendizado do melhor modelo
 
 <figure markdown>
   ![Curvas de RMSE de treino e validação do HistGB tunado em seis tamanhos de treino.](assets/images/learning_curves.png)
@@ -191,7 +255,7 @@ alvo original**. Se o objetivo fosse MAE ou erro percentual, o log seria a escol
 - As curvas convergem para um patamar alto, sinal de **viés**: uma melhora relevante exigiria informação nova sobre o
   imóvel, não só mais linhas.
 
-## 2. Avaliação do melhor modelo no conjunto de teste
+## Avaliação do melhor modelo no conjunto de teste
 
 O HistGB tunado, reajustado em todo o treino, é avaliado **uma única vez** nos 9.677 anúncios do teste (mesmo recorte de
 preço), que não participaram de nenhuma decisão anterior.
@@ -233,9 +297,9 @@ explica ~50% da variância do preço.
 Até US$ 150 há superestimação média de ~US$ 20; acima de US$ 400 a subestimação média chega a **US$ 267**. O erro
 agregado esconde que o modelo é bom para o mercado de massa e fraco para os anúncios caros.
 
-## 3. Interpretação e explicabilidade
+## Interpretação e explicabilidade
 
-### 3.1 Modelo linear: 3 maiores coeficientes em magnitude
+### Modelo linear: 3 maiores coeficientes em magnitude
 
 Ridge tunado com alvo original (coeficientes em US$). Numéricas padronizadas: o coeficiente é a variação para +1 desvio
 padrão. Colunas one-hot: contribuição de pertencer à categoria, mantidas as demais.
@@ -260,7 +324,7 @@ que é coerente com efeitos de localização que não são lineares nas coordena
 categorias (sem referência omitida), então comparações fazem mais sentido dentro de um mesmo bloco; bairro, distrito e
 coordenadas são redundantes; e são associações, não efeitos causais.
 
-### 3.2 Ensemble: 3 features de maior importância
+### Ensemble: 3 features de maior importância
 
 O HistGB não tem `feature_importances_`; usamos **importância por permutação** em 3.000 anúncios do teste (5 repetições,
 mesmo RMSE), embaralhando uma coluna **original** por vez.
@@ -276,13 +340,13 @@ mesmo RMSE), embaralhando uma coluna **original** por vez.
 2. **`longitude` (+US$ 11,4):** com `latitude` (5ª, +US$ 7,9), representa a localização. O ensemble usa as **coordenadas
    contínuas**, enquanto o Ridge se apoia nos indicadores de bairro.
 3. **`minimum_nights` (+US$ 10,6):** não aparecia entre os maiores coeficientes do Ridge, o que sugere um efeito não linear
-   capturado pelas árvores. A direção aparece na seção 3.3.
+   capturado pelas árvores. A direção aparece no [SHAP global](#shap-importancia-global).
 
 `availability_365` (+US$ 10,0) fica muito próxima da 3ª posição: diferenças de ~US$ 1 entre as posições 2 a 4 não tornam a
 ordem robusta. `neighbourhood` e `neighbourhood_group` ficam baixos porque sua informação já está nas coordenadas, e a
 permutação subestima features correlacionadas.
 
-### 3.3 SHAP: importância global
+### SHAP: importância global
 
 `TreeExplainer` (Lundberg; Lee, 2017) sobre 1.500 anúncios do teste pré-processados. Valores SHAP em **US$**: valor base
 (~US$ 137) + contribuições = previsão.
@@ -314,7 +378,7 @@ permutação subestima features correlacionadas.
 A ordem difere um pouco da permutação porque o SHAP mede quanto a feature **move a previsão**, e a permutação, quanto o
 **erro piora**.
 
-### 3.4 SHAP: três predições individuais
+### SHAP: três predições individuais
 
 Menor, mediano e maior preço predito na amostra SHAP; valor base de US$ 137,4.
 
@@ -349,11 +413,11 @@ compatível com uma operação comercial, mas os dados não confirmam isso. O mo
 Os três casos mostram o que a importância global não mostra: a feature dominante pode ser **superada** por uma combinação
 de outras (caso 3), e um erro grande pode vir da **ausência** de informação que diferencie o anúncio (caso 2).
 
-## 4. Discussão crítica
+## Discussão crítica
 
-### 4.1 Duas limitações do melhor modelo
+### Duas limitações do melhor modelo
 
-1. **Não informa a incerteza da previsão.** A seção 2 mostrou que o erro típico vai de ~US$ 20 nos anúncios baratos a
+1. **Não informa a incerteza da previsão.** A [avaliação no teste](#avaliacao-do-melhor-modelo-no-conjunto-de-teste) mostrou que o erro típico vai de ~US$ 20 nos anúncios baratos a
    mais de US$ 250 nos caros, mas o modelo devolve um único valor. Alternativas: **regressão quantílica**
    (Koenker; Bassett, 1978), disponível em `HistGradientBoostingRegressor(loss="quantile")`, ou **predição conformal**
    (Lei et al., 2018), com cobertura marginal garantida sob permutabilidade.
@@ -362,7 +426,7 @@ de outras (caso 3), e um erro grande pode vir da **ausência** de informação q
    agrupados, a validação aleatória subestima o erro, e Kaufman et al. (2012) tratam esse compartilhamento como
    vazamento. `GroupKFold` por `host_id` ou blocos espaciais dariam uma estimativa mais honesta.
 
-### 4.2 Duas limitações dos dados
+### Duas limitações dos dados
 
 1. **O alvo é o preço pedido, não o preço de mercado.** `price` é o valor cadastrado pelo anfitrião no dia da coleta, sem
    saber se houve reserva, descontos, taxas ou variação por data. Gibbs et al. (2018) encontraram diferenças sistemáticas
@@ -374,7 +438,7 @@ de outras (caso 3), e um erro grande pode vir da **ausência** de informação q
    Além disso, `availability_365 = 0` pode significar "sempre reservado" ou "anúncio inativo", e o modelo não distingue
    os dois casos.
 
-### 4.3 Duas ações para operacionalização e manutenção
+### Duas ações para operacionalização e manutenção
 
 1. **Empacotar o pipeline completo e validar as entradas.** Serializar pré-processamento + modelo num único artefato
    versionado (com versões das bibliotecas, esquema e recorte de preço) e servi-lo por uma API. Validar tipos, faixas

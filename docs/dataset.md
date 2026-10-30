@@ -10,7 +10,7 @@ O projeto utiliza o [**New York City Airbnb Open Data**](https://www.kaggle.com/
 ## Características Gerais
 
 Apenas informações estruturais do arquivo. Estatísticas e figuras usadas nas decisões são calculadas **somente no
-treino**, depois do split, e estão na [seção 0 da análise](analysis.md#0-dados-e-pipeline-de-pre-processamento).
+treino**, depois do split, e estão em [Dados e pipeline de pré-processamento](analysis.md#dados-e-pipeline-de-pre-processamento).
 
 | Métrica | Valor |
 |---|---:|

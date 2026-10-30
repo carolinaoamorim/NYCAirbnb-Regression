@@ -50,7 +50,7 @@ Desempenho no conjunto de teste mantido fora dos ajustes.
 | Qual é a referência? | `DummyRegressor` que prevê a média do preço no treino. |
 | Qual modelo teve melhor RMSE? | `HistGradientBoostingRegressor` ajustado, com RMSE médio de US$ 72,47 na validação cruzada. |
 | Como foi o resultado no teste? | RMSE de US$ 72,67, MAE de US$ 44,31 e R² de 0,50 (29% abaixo do Dummy). |
-| O que exige cuidado? | O erro cresce muito nos anúncios caros; as limitações do modelo e dos dados estão na [seção 4](analysis.md#4-discussao-critica). |
+| O que exige cuidado? | O erro cresce muito nos anúncios caros; as limitações do modelo e dos dados estão na [discussão crítica](analysis.md#discussao-critica). |
 
 ## Organização conforme o roteiro da APS2
 
@@ -59,7 +59,7 @@ Desempenho no conjunto de teste mantido fora dos ajustes.
 3. **Interpretação e explicabilidade:** três coeficientes do Ridge, três importâncias do ensemble, SHAP global e três casos individuais.
 4. **Discussão crítica:** duas limitações do modelo, duas dos dados e duas ações de operacionalização e manutenção, com referências.
 
-O [relatório](analysis.md) segue a mesma numeração de seções e de figuras (1 a 14) do notebook `nycairbnb.ipynb` e usa exclusivamente as figuras salvas nele, com análise para cada uma e vínculo explícito entre figura e decisão de pré-processamento.
+O [relatório](analysis.md) segue a mesma estrutura e a mesma numeração de figuras (1 a 14) do notebook `nycairbnb.ipynb` e usa exclusivamente as figuras salvas nele, com análise para cada uma e vínculo explícito entre figura e decisão de pré-processamento.
 
 ## Principais Achados
 

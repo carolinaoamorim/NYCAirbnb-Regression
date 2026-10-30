@@ -18,7 +18,7 @@ Para testar localmente ou publicar atualizações, veja [Setup e Execução](doc
 
 ## Estrutura da análise
 
-Após a seção 0 (dados e pipeline, com as decisões ligadas às Figuras 1 e 2), o relatório acompanha as quatro seções da APS2:
+Depois da preparação dos dados e do pipeline (com as decisões ligadas às Figuras 1 e 2), o relatório acompanha as quatro etapas do roteiro da APS2:
 
 1. **Seleção e implementação dos modelos** — Dummy, Ridge e HistGradientBoosting, validação cruzada, buscas de hiperparâmetros, transformação do alvo e curvas de aprendizado.
 2. **Avaliação do melhor modelo no teste** — métricas, valores reais versus preditos, resíduos versus preditos e distribuição dos resíduos.
@@ -32,7 +32,7 @@ As 14 figuras do relatório são exportadas diretamente das saídas salvas do no
 - O `HistGradientBoostingRegressor` ajustado obteve RMSE médio de validação cruzada de **US$ 72,47**, abaixo dos **US$ 103,12** do regressor de referência.
 - No teste, o modelo final obteve **RMSE de US$ 72,67**, **MAE de US$ 44,31** e **R² de 0,50**. A avaliação exclui preços acima do percentil 99 do conjunto de treino (US$ 798,76, impresso como US$ 799), conforme o notebook.
 - `room_type` foi a variável com maior importância por permutação; localização (`longitude`) e `minimum_nights` também contribuíram para o desempenho.
-- O erro cresce com o preço: o modelo é preciso no mercado de massa e subestima os anúncios caros. Limitações e ações de manutenção estão na seção 4 do relatório.
+- O erro cresce com o preço: o modelo é preciso no mercado de massa e subestima os anúncios caros. Limitações e ações de manutenção estão na discussão crítica do relatório.
 
 ## Tecnologias utilizadas
 

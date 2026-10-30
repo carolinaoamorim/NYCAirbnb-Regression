@@ -47,7 +47,7 @@ NYCAirbnb-Regression/
 |---|---|
 | `index.md` | Apresentação do problema, métricas e principais achados. |
 | `dataset.md` | Fonte, dicionário de dados, ausências e decisões de preparação. |
-| `analysis.md` | Preparação e as quatro seções da APS2: modelos, teste, explicabilidade e discussão crítica. |
+| `analysis.md` | Preparação e as quatro etapas da APS2: modelos, teste, explicabilidade e discussão crítica. |
 | `setup.md` | Instalação, execução do notebook e comandos MkDocs. |
 | `project-structure.md` | Estrutura do projeto e função de cada arquivo. |
 | `references.md` | Dataset, bibliotecas e conceitos usados. |

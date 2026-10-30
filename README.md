@@ -18,21 +18,21 @@ Para testar localmente ou publicar atualizações, veja [Setup e Execução](doc
 
 ## Estrutura da análise
 
-Após documentar a preparação dos dados, o relatório acompanha as quatro seções da APS2:
+Após a seção 0 (dados e pipeline, com as decisões ligadas às Figuras 1 e 2), o relatório acompanha as quatro seções da APS2:
 
 1. **Seleção e implementação dos modelos** — Dummy, Ridge e HistGradientBoosting, validação cruzada, buscas de hiperparâmetros, transformação do alvo e curvas de aprendizado.
 2. **Avaliação do melhor modelo no teste** — métricas, valores reais versus preditos, resíduos versus preditos e distribuição dos resíduos.
 3. **Interpretação e explicabilidade** — três coeficientes do Ridge, três importâncias por permutação do ensemble, SHAP global e três previsões individuais.
 4. **Discussão crítica** — duas limitações do modelo, duas dos dados e duas ações para operacionalização e manutenção, com referências bibliográficas.
 
-As 12 figuras do relatório são exportadas diretamente das saídas salvas do notebook por `python scripts/generate_docs_figures.py`. O script não produz visualizações adicionais. Cada figura tem análise, e as decisões de pré-processamento são vinculadas às evidências efetivamente apresentadas no código.
+As 14 figuras do relatório são exportadas diretamente das saídas salvas do notebook por `python scripts/generate_docs_figures.py`. O script não produz visualizações adicionais. Cada figura tem análise, e as decisões de pré-processamento são vinculadas às evidências efetivamente apresentadas no código.
 
 ## Principais resultados
 
-- O `HistGradientBoostingRegressor` ajustado obteve RMSE médio de validação cruzada de **US$ 72,73**, abaixo dos **US$ 103,12** do regressor de referência.
-- No teste, o modelo final obteve **RMSE de US$ 72,77**, **MAE de US$ 44,35** e **R² de 0,50**. A avaliação exclui preços acima do percentil 99 do conjunto de treino (US$ 798,76, impresso como US$ 799), conforme o notebook.
+- O `HistGradientBoostingRegressor` ajustado obteve RMSE médio de validação cruzada de **US$ 72,47**, abaixo dos **US$ 103,12** do regressor de referência.
+- No teste, o modelo final obteve **RMSE de US$ 72,67**, **MAE de US$ 44,31** e **R² de 0,50**. A avaliação exclui preços acima do percentil 99 do conjunto de treino (US$ 798,76, impresso como US$ 799), conforme o notebook.
 - `room_type` foi a variável com maior importância por permutação; localização (`longitude`) e `minimum_nights` também contribuíram para o desempenho.
-- Os dados representam o mercado de 2019 e a validação aleatória pode ser otimista para anúncios novos em regiões ou grupos de anfitriões não vistos.
+- O erro cresce com o preço: o modelo é preciso no mercado de massa e subestima os anúncios caros. Limitações e ações de manutenção estão na seção 4 do relatório.
 
 ## Tecnologias utilizadas
 

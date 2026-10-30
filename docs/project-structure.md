@@ -33,7 +33,7 @@ NYCAirbnb-Regression/
 - `nycairbnb.ipynb`: notebook de análise, treinamento, avaliação e interpretação dos modelos.
 - `AB_NYC_2019.csv`: dataset original de anúncios de Airbnb em NYC.
 - `docs/`: documentação do projeto em Markdown.
-- `docs/assets/images/`: somente as 12 figuras exportadas das saídas salvas do notebook, sem redesenho.
+- `docs/assets/images/`: somente as 14 figuras exportadas das saídas salvas do notebook, sem redesenho.
 - `docs/assets/stylesheets/extra.css`: ajustes visuais do tema MkDocs Material.
 - `scripts/generate_docs_figures.py`: exporta os PNGs salvos nas células do notebook, identificados por `metadata.docs_figures`; não gera gráficos novos.
 - `.github/workflows/deploy-docs.yml`: valida e publica o site no GitHub Pages a cada atualização relevante no branch `main`.

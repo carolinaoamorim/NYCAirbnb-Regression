@@ -68,7 +68,7 @@ Após executar e salvar o notebook, exporte os PNGs das suas saídas para a docu
 python scripts/generate_docs_figures.py
 ```
 
-O script usa apenas a biblioteca padrão do Python e copia as **12 figuras salvas** no notebook, sem ler o CSV, treinar modelos ou desenhar gráficos adicionais. Os nomes estão em `metadata.docs_figures` das células que produzem imagens. Se uma figura estiver ausente ou houver erro nas saídas, a exportação falha em vez de publicar resultados incompletos.
+O script usa apenas a biblioteca padrão do Python e copia as **14 figuras salvas** no notebook, sem ler o CSV, treinar modelos ou desenhar gráficos adicionais. Os nomes estão em `metadata.docs_figures` das células que produzem imagens. Se uma figura estiver ausente ou houver erro nas saídas, a exportação falha em vez de publicar resultados incompletos.
 
 O workflow do GitHub Pages executa a mesma exportação antes do build. Para atualizar resultados, execute **Restart & Run All**, salve o notebook, exporte as figuras e revise as análises e métricas do relatório antes de enviar os arquivos.
 

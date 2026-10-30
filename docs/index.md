@@ -3,7 +3,7 @@
 
 # Regressão Airbnb NYC
 
-Análise e modelagem do preço por noite de anúncios do Airbnb em Nova York, com avaliação reprodutível e discussão das limitações dos dados de 2019.
+Análise e modelagem do preço por noite de anúncios do Airbnb em Nova York, com avaliação reprodutível, interpretação dos modelos e discussão crítica.
 
 <div class="hero-actions" markdown>
 [Ver análise](analysis.md){ .md-button .md-button--primary }
@@ -14,7 +14,7 @@ Análise e modelagem do preço por noite de anúncios do Airbnb em Nova York, co
 
 ## Visão Geral
 
-Este projeto usa o **New York City Airbnb Open Data** para estimar o preço anunciado por noite (`price`, em dólares) a partir de dados de localização, tipo de acomodação, disponibilidade e avaliações. A etapa de modelagem compara um regressor de referência, Ridge e HistGradientBoosting.
+Este projeto usa o **New York City Airbnb Open Data** para estimar o preço por noite (`price`, em dólares) a partir de dados de localização, tipo de acomodação, disponibilidade e avaliações. A etapa de modelagem compara um regressor de referência, Ridge e HistGradientBoosting.
 
 <div class="metric-grid" markdown>
 <div class="metric-card" markdown>
@@ -31,7 +31,7 @@ Atributos de anúncio, anfitrião e preço.
 
 <div class="metric-card" markdown>
 <span class="metric-label">RMSE no teste</span>
-<strong>US$ 72,77</strong>
+<strong>US$ 72,67</strong>
 HistGradientBoosting ajustado, após o corte de valores extremos descrito na análise.
 </div>
 
@@ -46,11 +46,11 @@ Desempenho no conjunto de teste mantido fora dos ajustes.
 
 | Pergunta | Resposta da análise |
 |---|---|
-| Qual é o problema? | Regressão do preço anunciado por noite (`price`), em dólares. |
+| Qual é o problema? | Regressão do preço por noite (`price`), em dólares. |
 | Qual é a referência? | `DummyRegressor` que prevê a média do preço no treino. |
-| Qual modelo teve melhor RMSE? | `HistGradientBoostingRegressor` ajustado, com RMSE médio de US$ 72,73 na validação cruzada. |
-| Como foi o resultado no teste? | RMSE de US$ 72,77, MAE de US$ 44,35 e R² de 0,50. |
-| O que exige cuidado? | Valores extremos, diferença entre preço anunciado e preço efetivamente pago, defasagem do dataset e validação aleatória com dados geográficos. |
+| Qual modelo teve melhor RMSE? | `HistGradientBoostingRegressor` ajustado, com RMSE médio de US$ 72,47 na validação cruzada. |
+| Como foi o resultado no teste? | RMSE de US$ 72,67, MAE de US$ 44,31 e R² de 0,50 (29% abaixo do Dummy). |
+| O que exige cuidado? | O erro cresce muito nos anúncios caros; as limitações do modelo e dos dados estão na [seção 4](analysis.md#4-discussao-critica). |
 
 ## Organização conforme o roteiro da APS2
 
@@ -59,7 +59,7 @@ Desempenho no conjunto de teste mantido fora dos ajustes.
 3. **Interpretação e explicabilidade:** três coeficientes do Ridge, três importâncias do ensemble, SHAP global e três casos individuais.
 4. **Discussão crítica:** duas limitações do modelo, duas dos dados e duas ações de operacionalização e manutenção, com referências.
 
-O [relatório](analysis.md) utiliza exclusivamente as figuras salvas em `nycairbnb.ipynb`, com análise para cada uma e vínculo entre evidências e decisões de preparação.
+O [relatório](analysis.md) segue a mesma numeração de seções e de figuras (1 a 14) do notebook `nycairbnb.ipynb` e usa exclusivamente as figuras salvas nele, com análise para cada uma e vínculo explícito entre figura e decisão de pré-processamento.
 
 ## Principais Achados
 
@@ -69,7 +69,7 @@ O [relatório](analysis.md) utiliza exclusivamente as figuras salvas em `nycairb
 
 ### O ensemble supera a referência
 
-O HistGradientBoosting ajustado reduziu o RMSE de validação cruzada de US$ 103,12 (Dummy) para US$ 72,73.
+O HistGradientBoosting ajustado reduziu o RMSE de validação cruzada de US$ 103,12 (Dummy) para US$ 72,47.
 </div>
 
 <div class="highlight-card" markdown>
@@ -83,9 +83,9 @@ Na análise por permutação, `room_type` foi a variável mais importante, segui
 <div class="highlight-card" markdown>
 <span class="status-pill">Achado 3</span>
 
-### O contexto limita a aplicação
+### O erro se concentra nos anúncios caros
 
-Os anúncios são de 2019, e o preço registrado é o valor anunciado, não necessariamente o valor pago pelo hóspede.
+Até US$ 150 o erro médio absoluto fica entre US$ 22 e 36; acima de US$ 400 o modelo subestima, em média, US$ 267.
 </div>
 </div>
 
